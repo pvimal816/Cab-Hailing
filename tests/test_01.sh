@@ -19,7 +19,7 @@ else
 	testPassed="no"
 fi
 
-cab 101 signs out
+# cab 101 signs out
 resp=$(curl -s "http://localhost:8080/signOut?cabId=101")
 if [ "$resp" = "true" ];
 then

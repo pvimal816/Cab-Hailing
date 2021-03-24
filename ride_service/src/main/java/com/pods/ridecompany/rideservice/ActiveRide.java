@@ -5,7 +5,7 @@ import javax.persistence.*;
 @Entity
 public class ActiveRide{
     public static final String CAB_STATE_COMMITTED = "COMMITTED";
-    public static final String CAB_STATE_GIVING_RIDE = "GIVING_RIDE";
+    public static final String CAB_STATE_GIVING_RIDE = "GIVING-RIDE";
     Integer cabId;
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="rideSeqGen")
     @SequenceGenerator(name = "rideSeqGen",

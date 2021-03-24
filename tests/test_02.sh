@@ -87,7 +87,7 @@ fi
 
 # cab 102 must be alloted to customer 201
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=102")
-if [ "$resp" = "committed 10 201 34" ];
+if [ "$resp" = "giving-ride 14 201 34" ];
 then
 	echo "Customer 201 got a correct cab"
 else
@@ -97,7 +97,7 @@ fi
 
 # cab 104 must be alloted to customer 202
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=104")
-if [ "$resp" = "committed 30 202 34" ];
+if [ "$resp" = "giving-ride 26 202 34" ];
 then
 	echo "Customer 202 got a correct cab"
 else
@@ -107,7 +107,7 @@ fi
 
 # cab 103 must be alloted to customer 203
 resp=$(curl -s "http://localhost:8081/getCabStatus?cabId=103")
-if [ "$resp" = "committed 20 203 34" ];
+if [ "$resp" = "giving-ride 14 203 34" ];
 then
 	echo "Customer 203 got a correct cab"
 else

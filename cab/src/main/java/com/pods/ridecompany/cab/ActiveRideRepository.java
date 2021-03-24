@@ -10,4 +10,5 @@ public interface ActiveRideRepository extends Repository<ActiveRide, Integer>{
     List<ActiveRide> findActiveRidesByCabIdAndRideId(Integer cabId, Integer rideId);
     void removeActiveRidesByCabIdAndRideId(Integer cabId, Integer rideId);
     boolean existsActiveRideByCabId(Integer cabId);
+    boolean existsActiveRideByCabIdAndCabState(Integer cabId, String cabState); 
 }

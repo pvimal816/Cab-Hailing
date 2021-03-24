@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.lang.Math;
 
 @Controller
 @Transactional
@@ -17,7 +18,9 @@ public class RideController {
     private final ActiveCabsRepository activeCabsRepo;
     private final CabRepository cabRepo;
     private static final String CAB_SERVICE_URL = "http://localhost:8080";
+    private static final String WALLET_SERVICE_URL = "http://localhost:8082";
     private static RestTemplate restTemplate = new RestTemplate();
+
 
     @Autowired
     public RideController(ActiveRideRepository activeRideRepo, ActiveCabsRepository activeCabsRepo, CabRepository cabRepo) {
@@ -35,18 +38,40 @@ public class RideController {
             if(!cab.isInterested){
                 continue;
             }
-
-            //TODO: deduct the fare from customer's wallet
-
-            //TODO: if payment is successful then forward request to cab service
-
+            //generate a rideId
+            ActiveRide ride = new ActiveRide(cab.cabId, sourceLoc, destinationLoc, ActiveRide.CAB_STATE_COMMITTED, custId);
+            ride = activeRideRepo.save(ride);
+            // forward requestRide to cab
+            boolean cabResponse = restTemplate.getForObject(CAB_SERVICE_URL+"requestRide?cabId="+cab.cabId
+                                    +"&rideId="+ride.rideId+"&sourceLoc="+sourceLoc+"&destinationLoc="+destinationLoc, Boolean.class);                                
+            // now ride will not be interested in next ride request
             cab.isInterested = false;
             cab.isAvailable = false;
             activeCabsRepo.save(cab);
-            ActiveRide ride = new ActiveRide(cab.cabId, sourceLoc, destinationLoc, ActiveRide.CAB_STATE_COMMITTED, custId);
-            ride = activeRideRepo.save(ride);
-            return ride.rideId;
+
+            if(!cabResponse){
+                // cab has denied a ride request
+                // so delete this entry from rideService database also
+                activeRideRepo.removeActiveRidesByRideId(ride.rideId);
+                continue;
+            }
+            
+            // cab has accepted a ride request and now it is in committed state
+            int fare = (Math.abs(cab.lastStableLocation - sourceLoc) + Math.abs(sourceLoc - destinationLoc)) * 2;
+            boolean paymentSuccess = restTemplate.getForObject( WALLET_SERVICE_URL+"/deductAmount?custId="+custId+"&amount="+fare, Boolean.class);
+            if(paymentSuccess){
+                // payment successfull, so inform a cab to start a ride
+                restTemplate.getForObject(CAB_SERVICE_URL+"/rideStarted?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
+                ride.cabState = ActiveRide.CAB_STATE_GIVING_RIDE;
+                activeRideRepo.save(ride);
+                return ride.rideId;
+            }else{
+                restTemplate.getForObject(CAB_SERVICE_URL+"/rideCanceled?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
+                activeRideRepo.removeActiveRidesByRideId(ride.rideId);
+                return -1;
+            }
         }
+        // No cab found to satisfy request
         return -1;
     }
 
@@ -123,7 +148,7 @@ public class RideController {
 
         ActiveRide ride = activeRideRepo.findActiveRideByCabId(cabId).get(0);
         if(ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
-            return "giving-ride " + ride.getSrcLoc() + ride.getCustId() + ride.getDstLoc();
+            return "giving-ride " + ride.getSrcLoc() + " " + ride.getCustId() + " " + ride.getDstLoc();
         }
 
         return "committed " + cabs.get(0).lastStableLocation + " " + ride.getCustId() + " " + ride.getDstLoc();
@@ -138,7 +163,7 @@ public class RideController {
             if(ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
                 restTemplate.getForObject(
                         CAB_SERVICE_URL+ "/rideEnded?cabId=" + ride.cabId + "&rideId=" + ride.rideId,
-                        Integer.class);
+                        Boolean.class);
                 ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
                 cab.isAvailable = true;
                 cab.lastStableLocation = ride.dstLoc;
@@ -147,7 +172,7 @@ public class RideController {
             }else if(ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
                 restTemplate.getForObject(
                         CAB_SERVICE_URL+ "/rideCanceled?cabId=" + ride.cabId + "&rideId=" + ride.rideId,
-                        Integer.class);
+                        Boolean.class);
                 ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
                 cab.isAvailable = true;
                 activeCabsRepo.save(cab);

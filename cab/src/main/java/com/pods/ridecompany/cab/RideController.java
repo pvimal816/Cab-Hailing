@@ -17,101 +17,106 @@ import javax.transaction.Transactional;
 public class RideController {
     public final ActiveRideRepository activeRideRepository;
     public final ActiveCabsRepository activeCabsRepository;
+    public final CabCredentialsRepository cabRepo;
+
     private static final String RIDE_SERVICE_URL = "http://localhost:8081";
     private static RestTemplate restTemplate = new RestTemplate();
+    
 
     @Autowired
     ConsumeRestAPI consumeRestAPI;
 
     @Autowired
-    public RideController(ActiveRideRepository activeRideRepository, ActiveCabsRepository activeCabsRepository){
+    public RideController(ActiveRideRepository activeRideRepository, ActiveCabsRepository activeCabsRepository, CabCredentialsRepository cabRepo){
         this.activeRideRepository = activeRideRepository;
         this.activeCabsRepository = activeCabsRepository;
+        this.cabRepo = cabRepo;
     }
 
     @RequestMapping(value = "/requestRide", method = RequestMethod.GET)
     @ResponseBody
-    public Integer requestRide(@RequestParam Integer cabId, @RequestParam Integer rideId,
+    public boolean requestRide(@RequestParam Integer cabId, @RequestParam Integer rideId,
                                @RequestParam Integer sourceLoc, @RequestParam Integer destinationLoc){
         ActiveCab cab;
         try {
             cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
         }catch (IndexOutOfBoundsException e){
             //No cab present with this cabId
-            return -1;
+            return false;
         }
 
         if(activeRideRepository.existsActiveRideByCabId(cabId)){
             //the cab is busy
-            return -1;
+            return false;
         }
 
         if(cab.isInterested==0){
             //cab is not interested in taking this ride.
             cab.isInterested = 1;
             activeCabsRepository.save(cab);
-            return -1;
+            return false;
         }
 
         ActiveRide ride = new ActiveRide(cabId, rideId, sourceLoc, destinationLoc, ActiveRide.CAB_STATE_COMMITTED);
         activeRideRepository.save(ride);
         cab.isInterested = 0;
         activeCabsRepository.save(cab);
-        return 1;
+        return true;
     }
 
     @RequestMapping(value="/rideStarted", method = RequestMethod.GET)
     @ResponseBody
-    public Integer rideStarted(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    public boolean rideStarted(@RequestParam Integer cabId, @RequestParam Integer rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
                 //ride already started
-                return -1;
+                return false;
             }
             ride.cabState = ActiveRide.CAB_STATE_GIVING_RIDE;
             activeRideRepository.save(ride);
         }catch (IndexOutOfBoundsException e){
             //no request received for this (cabId, rideId) pair.
             //probably /requestRide is bypassed
-            return -1;
+            return false;
         }
-        return 1;
+        return true;
     }
 
     @RequestMapping(value="/rideCanceled", method = RequestMethod.GET)
     @ResponseBody
-    public Integer rideCanceled(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    @Transactional
+    public boolean rideCanceled(@RequestParam Integer cabId, @RequestParam Integer rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
                 //ride already started. Can not cancel now.
-                return -1;
+                return false;
             }
             activeRideRepository.removeActiveRidesByCabIdAndRideId(cabId, rideId);
         }catch (IndexOutOfBoundsException e){
             //no request received for this (cabId, rideId) pair.
             //probably /requestRide is bypassed
-            return -1;
+            return false;
         }
-        return 1;
+        return true;
     }
 
     @RequestMapping(value="/rideEnded", method = RequestMethod.GET)
     @ResponseBody
     @Transactional
-    public Integer rideEnded(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    public boolean rideEnded(@RequestParam Integer cabId, @RequestParam Integer rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
                 //ride not yet started.
-                return -1;
+                return false;
             }
 
             //notify /rideService/rideEnded endpoint
-            Integer result = restTemplate.getForObject(RIDE_SERVICE_URL+"/rideEnded?rideId="+rideId, Integer.class);
-            if(result!=1)
-                return -1;
+            boolean result = restTemplate.getForObject(RIDE_SERVICE_URL+"/rideEnded?rideId="+rideId, Boolean.class);
+            if(!result)
+                return false;
 
             //update the location in active_cab table
             try {
@@ -122,27 +127,33 @@ public class RideController {
             }catch (IndexOutOfBoundsException e) {
                 System.err.println("Found a record in active_ride table with no " +
                         "corresponding cabId in active_cab table. CabId: " + ride.cabId);
-                return -1;
+                return false;
             }
             //now remove this ride entry from active_ride table
             activeRideRepository.removeActiveRidesByCabIdAndRideId(cabId, rideId);
         }catch (IndexOutOfBoundsException e){
             //no request received for this (cabId, rideId) pair.
             //probably /requestRide is bypassed
-            return -1;
+            return false;
         }
-        return 1;
+        return true;
     }
 
     @RequestMapping(value = "/numRides", method = RequestMethod.GET)
     @ResponseBody
     public Integer numRides(@RequestParam Integer cabId){
+        if(!cabRepo.existsByCabId(cabId)){
+            // Invalid cabId
+            return -1;
+        }
         try{
             ActiveCab cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
+            if(activeRideRepository.existsActiveRideByCabIdAndCabState(cabId, ActiveRide.CAB_STATE_GIVING_RIDE))
+                return cab.rideCnt+1;
             return cab.rideCnt;
         } catch (IndexOutOfBoundsException e){
-            // cabId is invalid or not signed in.
-            return -1;
+            // cab is not signed ins
+            return 0;
         }
     }
 }
