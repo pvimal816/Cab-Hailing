@@ -17,8 +17,8 @@ public class RideController {
     private final ActiveRideRepository activeRideRepo;
     private final ActiveCabsRepository activeCabsRepo;
     private final CabRepository cabRepo;
-    private static final String CAB_SERVICE_URL = "http://localhost:8080";
-    private static final String WALLET_SERVICE_URL = "http://localhost:8082";
+    private static final String CAB_SERVICE_URL = "http://host.docker.internal:8080";
+    private static final String WALLET_SERVICE_URL = "http://host.docker.internal:8082";
     private static RestTemplate restTemplate = new RestTemplate();
 
 
@@ -88,6 +88,7 @@ public class RideController {
             ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
             cab.lastStableLocation = ride.dstLoc;
             cab.rideCnt += 1;
+            cab.isAvailable = true;
             activeCabsRepo.save(cab);
             activeRideRepo.removeActiveRidesByRideId(rideId);
             return true;
