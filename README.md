@@ -1,4 +1,4 @@
-# pods_project_01
+# pods project 01
 
 A web app for cab hailing company.
 
