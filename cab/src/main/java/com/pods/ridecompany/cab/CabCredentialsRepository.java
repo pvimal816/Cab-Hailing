@@ -5,8 +5,8 @@ import org.springframework.data.repository.Repository;
 
 import java.util.List;
 
-public interface CabCredentialsRepository extends Repository<CabCredentials, Integer> {
+public interface CabCredentialsRepository extends Repository<CabCredentials, Long> {
     void save(CabCredentials cabCredentials);
-    boolean existsByCabIdAndPassword(Integer cabId, String password);
-    boolean existsByCabId(Integer cabId);
+    boolean existsByCabIdAndPassword(Long cabId, String password);
+    boolean existsByCabId(Long cabId);
 }

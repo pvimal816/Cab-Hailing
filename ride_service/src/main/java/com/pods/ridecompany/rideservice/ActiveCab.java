@@ -5,19 +5,19 @@ import javax.persistence.*;
 @Entity
 public class ActiveCab {
     @Id
-    Integer cabId;
+    Long cabId;
     @Column(nullable = false, columnDefinition = "numeric default '0'")
-    Integer rideCnt;
+    Long rideCnt;
     @Column(nullable = false)
-    Integer lastStableLocation;
+    Long lastStableLocation;
     @Column(nullable = false)
     boolean isInterested;
     @Column(nullable = false)
     boolean isAvailable;
 
-    public ActiveCab(Integer cabId, Integer lastStableLocation){
+    public ActiveCab(Long cabId, Long lastStableLocation){
         this.cabId = cabId;
-        this.rideCnt = 0;
+        this.rideCnt = 0L;
         this.lastStableLocation = lastStableLocation;
         this.isInterested = true;
         this.isAvailable = true;
@@ -25,27 +25,27 @@ public class ActiveCab {
 
     public ActiveCab(){}
 
-    public Integer getCabId() {
+    public Long getCabId() {
         return cabId;
     }
 
-    public void setCabId(Integer cabId) {
+    public void setCabId(Long cabId) {
         this.cabId = cabId;
     }
 
-    public Integer getRideCnt() {
+    public Long getRideCnt() {
         return rideCnt;
     }
 
-    public void setRideCnt(Integer rideCnt) {
+    public void setRideCnt(Long rideCnt) {
         this.rideCnt = rideCnt;
     }
 
-    public Integer getLastStableLocation() {
+    public Long getLastStableLocation() {
         return lastStableLocation;
     }
 
-    public void setLastStableLocation(Integer lastStableLocation) {
+    public void setLastStableLocation(Long lastStableLocation) {
         this.lastStableLocation = lastStableLocation;
     }
 

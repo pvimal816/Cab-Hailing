@@ -7,16 +7,16 @@ import javax.persistence.Id;
 @Entity
 public class CabCredentials {
     @Id
-    Integer cabId;
+    Long cabId;
     @Column(nullable = false, columnDefinition = "numeric default '0'")
     String password;
 
-    public CabCredentials(Integer cabId, String password) {
+    public CabCredentials(Long cabId, String password) {
         this.cabId = cabId;
         this.password = password;
     }
 
-    public CabCredentials(Integer cabId) {
+    public CabCredentials(Long cabId) {
         this.cabId = cabId;
         this.password = "0";
     }

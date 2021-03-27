@@ -1,3 +1,5 @@
+#! /bin/sh
+
 cd cab
 ./mvnw -DskipTests clean package
 docker build -t cab_service .
@@ -19,5 +21,5 @@ sleep 100
 # Run tests
 cd ../tests
 for f in *.sh; do
-  bash "$f" || break
+  sh "$f" || break
 done

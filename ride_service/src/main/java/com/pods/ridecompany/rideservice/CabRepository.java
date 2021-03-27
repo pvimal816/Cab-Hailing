@@ -6,7 +6,7 @@ import org.springframework.data.repository.Repository;
 
 import java.util.List;
 
-public interface CabRepository extends Repository<Cab, Integer> {
+public interface CabRepository extends Repository<Cab, Long> {
     void save(Cab cab);
-    boolean existsByCabId(Integer cabId);
+    boolean existsByCabId(Long cabId);
 }

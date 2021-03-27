@@ -11,8 +11,8 @@ import java.util.List;
 public interface WalletRepository extends Repository<Wallet, Integer> {
     void save(Wallet wallet);
     @Query(value = "select custId from Wallet")
-    List<Integer> allIds();
-    Wallet findByCustId(Integer custId);
-    boolean existsByCustId(Integer custId);
-    List<Wallet> findWalletsByCustId(Integer custId);
+    List<Long> allIds();
+    Wallet findByCustId(Long custId);
+    boolean existsByCustId(Long custId);
+    List<Wallet> findWalletsByCustId(Long custId);
 }

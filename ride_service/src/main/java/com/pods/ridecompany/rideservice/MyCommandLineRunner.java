@@ -31,7 +31,7 @@ public class MyCommandLineRunner implements CommandLineRunner {
             //Halt when line containing "****" is encountered
             if(st.equals("****"))
                 break;
-            Cab cabCredentials = new Cab(Integer.valueOf(st));
+            Cab cabCredentials = new Cab(Long.valueOf(st));
             cabRepo.save(cabCredentials);
         }
 
@@ -39,7 +39,7 @@ public class MyCommandLineRunner implements CommandLineRunner {
             //Halt when line containing "****" is encountered
             if(st.equals("****"))
                 break;
-            Customer customer = new Customer(Integer.valueOf(st));
+            Customer customer = new Customer(Long.valueOf(st));
             customerRepo.save(customer);
         }
     }

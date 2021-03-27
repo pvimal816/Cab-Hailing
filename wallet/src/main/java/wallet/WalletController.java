@@ -21,19 +21,19 @@ public class WalletController {
 
     @GetMapping("/getBalance")
     @ResponseBody
-    public Integer getBalance(@RequestParam Integer custId){
+    public Long getBalance(@RequestParam Long custId){
         try{
             Wallet wallet = repository.findWalletsByCustId(custId).get(0);
             return wallet.balance;
         }catch(IndexOutOfBoundsException e){
             // should not occur
-            return -1;
+            return -1L;
         }
     }
 
     @GetMapping("/addAmount")
     @ResponseBody
-    public void addAmount(@RequestParam Integer custId, @RequestParam Integer amount){
+    public void addAmount(@RequestParam Long custId, @RequestParam Long amount){
         try{
             Wallet wallet = repository.findWalletsByCustId(custId).get(0);
             wallet.balance = wallet.balance+amount;
@@ -45,7 +45,7 @@ public class WalletController {
 
     @GetMapping("/deductAmount")
     @ResponseBody
-    public boolean deductAmount(@RequestParam Integer custId, @RequestParam Integer amount){
+    public boolean deductAmount(@RequestParam Long custId, @RequestParam Long amount){
         try{
             Wallet wallet = repository.findWalletsByCustId(custId).get(0);
             if(wallet.balance < amount)

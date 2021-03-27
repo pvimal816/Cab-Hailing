@@ -14,7 +14,7 @@ public class SignOutController {
     public final ActiveRideRepository activeRideRepository;
     public final ActiveCabsRepository activeCabsRepository;
     private static final String RIDE_SERVICE_URL = "http://host.docker.internal:8081";
-    private static RestTemplate restTemplate = new RestTemplate();
+    private static final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public SignOutController(ActiveRideRepository activeRideRepository, ActiveCabsRepository activeCabsRepository) {
@@ -25,7 +25,7 @@ public class SignOutController {
     @RequestMapping("/signOut")
     @ResponseBody
     @Transactional
-    public boolean signOut(@RequestParam Integer cabId){
+    public boolean signOut(@RequestParam Long cabId){
         if(!activeCabsRepository.existsByCabId(cabId) ||
                 activeRideRepository.existsActiveRideByCabId(cabId)){
             return false;

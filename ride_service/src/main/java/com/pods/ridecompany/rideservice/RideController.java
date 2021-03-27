@@ -32,7 +32,7 @@ public class RideController {
     @GetMapping(value = "requestRide")
     @ResponseBody
     @Transactional
-    public Integer requestRide(@RequestParam Integer custId, @RequestParam Integer sourceLoc, @RequestParam Integer destinationLoc){
+    public Long requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
             if(!cab.isInterested){
@@ -57,7 +57,7 @@ public class RideController {
             }
             
             // cab has accepted a ride request and now it is in committed state
-            int fare = (Math.abs(cab.lastStableLocation - sourceLoc) + Math.abs(sourceLoc - destinationLoc)) * 2;
+            Long fare = (Math.abs(cab.lastStableLocation - sourceLoc) + Math.abs(sourceLoc - destinationLoc)) * 2;
             boolean paymentSuccess = restTemplate.getForObject( WALLET_SERVICE_URL+"/deductAmount?custId="+custId+"&amount="+fare, Boolean.class);
             if(paymentSuccess){
                 // payment successfull, so inform a cab to start a ride
@@ -68,17 +68,17 @@ public class RideController {
             }else{
                 restTemplate.getForObject(CAB_SERVICE_URL+"/rideCanceled?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
                 activeRideRepo.removeActiveRidesByRideId(ride.rideId);
-                return -1;
+                return -1L;
             }
         }
         // No cab found to satisfy request
-        return -1;
+        return -1L;
     }
 
     @GetMapping(value="/rideEnded")
     @ResponseBody
     @Transactional
-    public boolean rideEnded(@RequestParam Integer rideId){
+    public boolean rideEnded(@RequestParam Long rideId){
         try{
             ActiveRide ride = activeRideRepo.findRidesByRideId(rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
@@ -101,7 +101,7 @@ public class RideController {
     @GetMapping(value="/cabSignsIn")
     @ResponseBody
     @Transactional
-    public boolean cabSignsIn(@RequestParam Integer cabId, @RequestParam Integer initialPos){
+    public boolean cabSignsIn(@RequestParam Long cabId, @RequestParam Long initialPos){
         boolean cabIdState = cabRepo.existsByCabId(cabId);
         boolean isSignedIn = activeCabsRepo.existsByCabId(cabId);
         if(cabIdState && !isSignedIn){
@@ -115,7 +115,7 @@ public class RideController {
     @GetMapping(value="/cabSignsOut")
     @ResponseBody
     @Transactional
-    public boolean cabSignsOut(@RequestParam Integer cabId){
+    public boolean cabSignsOut(@RequestParam Long cabId){
         boolean inSignedIn = activeCabsRepo.existsByCabId(cabId);
         boolean isAvailable = !activeRideRepo.existsByCabId(cabId);
 
@@ -129,7 +129,7 @@ public class RideController {
     @GetMapping(value="/getCabStatus")
     @ResponseBody
     @Transactional
-    public String getCabStatus(@RequestParam Integer cabId){
+    public String getCabStatus(@RequestParam Long cabId){
 
         boolean isValidCabId = cabRepo.existsByCabId(cabId);
 

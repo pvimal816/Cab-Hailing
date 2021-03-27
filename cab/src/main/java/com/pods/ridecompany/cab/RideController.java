@@ -35,8 +35,8 @@ public class RideController {
 
     @RequestMapping(value = "/requestRide", method = RequestMethod.GET)
     @ResponseBody
-    public boolean requestRide(@RequestParam Integer cabId, @RequestParam Integer rideId,
-                               @RequestParam Integer sourceLoc, @RequestParam Integer destinationLoc){
+    public boolean requestRide(@RequestParam Long cabId, @RequestParam Long rideId,
+                               @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
         ActiveCab cab;
         try {
             cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
@@ -66,7 +66,7 @@ public class RideController {
 
     @RequestMapping(value="/rideStarted", method = RequestMethod.GET)
     @ResponseBody
-    public boolean rideStarted(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    public boolean rideStarted(@RequestParam Long cabId, @RequestParam Long rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
@@ -86,7 +86,7 @@ public class RideController {
     @RequestMapping(value="/rideCanceled", method = RequestMethod.GET)
     @ResponseBody
     @Transactional
-    public boolean rideCanceled(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    public boolean rideCanceled(@RequestParam Long cabId, @RequestParam Long rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
@@ -105,7 +105,7 @@ public class RideController {
     @RequestMapping(value="/rideEnded", method = RequestMethod.GET)
     @ResponseBody
     @Transactional
-    public boolean rideEnded(@RequestParam Integer cabId, @RequestParam Integer rideId){
+    public boolean rideEnded(@RequestParam Long cabId, @RequestParam Long rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
@@ -141,10 +141,10 @@ public class RideController {
 
     @RequestMapping(value = "/numRides", method = RequestMethod.GET)
     @ResponseBody
-    public Integer numRides(@RequestParam Integer cabId){
+    public Long numRides(@RequestParam Long cabId){
         if(!cabRepo.existsByCabId(cabId)){
             // Invalid cabId
-            return -1;
+            return -1L;
         }
         try{
             ActiveCab cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
@@ -153,7 +153,7 @@ public class RideController {
             return cab.rideCnt;
         } catch (IndexOutOfBoundsException e){
             // cab is not signed ins
-            return 0;
+            return 0L;
         }
     }
 }

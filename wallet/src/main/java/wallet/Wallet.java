@@ -8,30 +8,30 @@ import javax.persistence.Id;
 public class Wallet {
 
     @Id
-    Integer custId;
-    Integer balance;
+    Long custId;
+    Long balance;
 
     public Wallet(){
     }
 
-    public Wallet(Integer id, Integer balance) {
+    public Wallet(Long id, Long balance) {
         this.custId = id;
         this.balance = balance;
     }
 
-    public Integer getCustId() {
+    public Long getCustId() {
         return custId;
     }
 
-    public void setCustId(Integer custId) {
+    public void setCustId(Long custId) {
         this.custId = custId;
     }
 
-    public Integer getBalance() {
+    public Long getBalance() {
         return balance;
     }
 
-    public void setBalance(Integer balance) {
+    public void setBalance(Long balance) {
         this.balance = balance;
     }
 

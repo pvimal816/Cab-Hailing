@@ -31,7 +31,7 @@ public class MyCommandLineRunner implements CommandLineRunner {
             //Halt when line containing "****" is encountered
             if(st.equals("****"))
                 break;
-            CabCredentials cabCredentials = new CabCredentials(Integer.valueOf(st));
+            CabCredentials cabCredentials = new CabCredentials(Long.valueOf(st));
             cabCredentialsRepository.save(cabCredentials);
         }
     }

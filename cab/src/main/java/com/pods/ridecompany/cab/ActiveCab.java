@@ -5,17 +5,17 @@ import javax.persistence.*;
 @Entity
 public class ActiveCab {
     @Id
-    Integer cabId;
+    Long cabId;
     @Column(nullable = false, columnDefinition = "numeric default '0'")
-    Integer rideCnt;
+    Long rideCnt;
     @Column(nullable = false)
-    Integer lastStableLocation;
+    Long lastStableLocation;
     @Column(nullable = false, columnDefinition = "numeric default '0'")
     Integer isInterested;
 
-    public ActiveCab(Integer cabId, Integer lastStableLocation){
+    public ActiveCab(Long cabId, Long lastStableLocation){
         this.cabId = cabId;
-        this.rideCnt = 0;
+        this.rideCnt = 0L;
         this.lastStableLocation = lastStableLocation;
         this.isInterested = 1;
     }

@@ -7,11 +7,11 @@ import javax.persistence.Id;
 @Entity
 public class Customer {
     @Id
-    Integer custId;
+    Long custId;
     @Column(nullable = false)
     String password;
 
-    public Customer(Integer custId) {
+    public Customer(Long custId) {
         this.custId = custId;
         this.password = "0";
     }

@@ -29,7 +29,7 @@ public class LoadDatabase {
                 break;
 
         st = br.readLine();
-        int init_balance = Integer.valueOf(st);
+        long init_balance = Long.parseLong(st);
         br = new BufferedReader(new FileReader(new File("IDs.txt")));
         br.readLine();
         while((st=br.readLine())!=null)
@@ -39,7 +39,7 @@ public class LoadDatabase {
             //Halt when line containing "****" is encountered
             if(st.equals("****"))
                 break;
-            int customer_id = Integer.valueOf(st);
+            long customer_id = Long.parseLong(st);
             if(walletRepo.existsByCustId(customer_id)){
                 Wallet walletEntry = walletRepo.findByCustId(customer_id);
                 walletEntry.balance = init_balance;

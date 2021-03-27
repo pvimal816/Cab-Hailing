@@ -6,23 +6,23 @@ import javax.persistence.*;
 public class ActiveRide{
     public static final String CAB_STATE_COMMITTED = "COMMITTED";
     public static final String CAB_STATE_GIVING_RIDE = "GIVING-RIDE";
-    Integer cabId;
+    Long cabId;
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator="rideSeqGen")
     @SequenceGenerator(name = "rideSeqGen",
             initialValue = 1, allocationSize = 1
     )
     @Id
-    Integer rideId;
+    Long rideId;
     @Column(nullable = false)
-    Integer srcLoc;
+    Long srcLoc;
     @Column(nullable = false)
-    Integer dstLoc;
+    Long dstLoc;
     @Column(nullable = false, columnDefinition = "varchar(256) default 'COMMITTED'")
     String cabState;
     @Column(nullable = false)
-    Integer custId;
+    Long custId;
 
-    public ActiveRide(Integer cabId, Integer srcLoc, Integer dstLoc, String cabState, Integer custId) {
+    public ActiveRide(Long cabId, Long srcLoc, Long dstLoc, String cabState, Long custId) {
         this.cabId = cabId;
         this.srcLoc = srcLoc;
         this.dstLoc = dstLoc;
@@ -32,35 +32,35 @@ public class ActiveRide{
 
     public ActiveRide(){}
 
-    public Integer getCabId() {
+    public Long getCabId() {
         return cabId;
     }
 
-    public void setCabId(Integer cabId) {
+    public void setCabId(Long cabId) {
         this.cabId = cabId;
     }
 
-    public Integer getRideId() {
+    public Long getRideId() {
         return rideId;
     }
 
-    public void setRideId(Integer rideId) {
+    public void setRideId(Long rideId) {
         this.rideId = rideId;
     }
 
-    public Integer getSrcLoc() {
+    public Long getSrcLoc() {
         return srcLoc;
     }
 
-    public void setSrcLoc(Integer srcLoc) {
+    public void setSrcLoc(Long srcLoc) {
         this.srcLoc = srcLoc;
     }
 
-    public Integer getDstLoc() {
+    public Long getDstLoc() {
         return dstLoc;
     }
 
-    public void setDstLoc(Integer dstLoc) {
+    public void setDstLoc(Long dstLoc) {
         this.dstLoc = dstLoc;
     }
 
@@ -72,11 +72,11 @@ public class ActiveRide{
         this.cabState = cabState;
     }
 
-    public Integer getCustId() {
+    public Long getCustId() {
         return custId;
     }
 
-    public void setCustId(Integer custId) {
+    public void setCustId(Long custId) {
         this.custId = custId;
     }
 

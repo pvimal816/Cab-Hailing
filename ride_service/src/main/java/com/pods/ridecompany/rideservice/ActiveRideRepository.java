@@ -6,23 +6,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public interface ActiveRideRepository extends Repository<ActiveRide, Integer>{
+public interface ActiveRideRepository extends Repository<ActiveRide, Long>{
 //    void save(ActiveRide activeRide);
     ActiveRide save(ActiveRide activeRide);
 
-    List<ActiveRide> findActiveRideByCabId(Integer cabId);
-    List<ActiveRide> findActiveRidesByCabIdAndRideId(Integer cabId, Integer rideId);
-    List<ActiveRide> findRidesByRideId(Integer rideId);
+    List<ActiveRide> findActiveRideByCabId(Long cabId);
+    List<ActiveRide> findActiveRidesByCabIdAndRideId(Long cabId, Long rideId);
+    List<ActiveRide> findRidesByRideId(Long rideId);
     
     //TODO: Check why following annotation is needed.
     @Transactional
-    void removeActiveRideByCabId(Integer cabId);
+    void removeActiveRideByCabId(Long cabId);
     @Transactional
-    void removeActiveRidesByRideId(Integer rideId);
+    void removeActiveRidesByRideId(Long rideId);
     @Transactional
-    void removeActiveRidesByCabIdAndRideId(Integer cabId, Integer rideId);
+    void removeActiveRidesByCabIdAndRideId(Long cabId, Long rideId);
     
-    boolean existsByCabId(Integer cabId);
+    boolean existsByCabId(Long cabId);
 
     List<ActiveRide> findAll();
 }

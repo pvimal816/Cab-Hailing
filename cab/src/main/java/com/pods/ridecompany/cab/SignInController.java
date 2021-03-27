@@ -24,7 +24,7 @@ public class SignInController {
 
     @RequestMapping("/signIn")
     @ResponseBody
-    public boolean signIn(@RequestParam Integer cabId, @RequestParam Integer initialPos){
+    public boolean signIn(@RequestParam Long cabId, @RequestParam Long initialPos){
         if(!cabCredentialsRepository.existsByCabId(cabId)){
             return false;
         }

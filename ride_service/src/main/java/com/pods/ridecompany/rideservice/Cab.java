@@ -8,16 +8,16 @@ import javax.persistence.Table;
 @Entity
 public class Cab {
     @Id
-    Integer cabId;
+    Long cabId;
     @Column(nullable = false, columnDefinition = "numeric default '0'")
     String password;
 
-    public Cab(Integer cabId, String password) {
+    public Cab(Long cabId, String password) {
         this.cabId = cabId;
         this.password = password;
     }
 
-    public Cab(Integer cabId) {
+    public Cab(Long cabId) {
         this.cabId = cabId;
         this.password = "0";
     }

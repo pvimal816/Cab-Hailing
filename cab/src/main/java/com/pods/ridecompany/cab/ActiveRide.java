@@ -7,21 +7,21 @@ public class ActiveRide {
     public static final String CAB_STATE_COMMITTED = "COMMITTED";
     public static final String CAB_STATE_GIVING_RIDE = "GIVING_RIDE";
     @Id
-    Integer cabId;
+    Long cabId;
 
     @Column(nullable = false)
-    Integer rideId;
+    Long rideId;
 
     @Column(nullable = false)
-    Integer srcLoc;
+    Long srcLoc;
 
     @Column(nullable = false)
-    Integer dstLoc;
+    Long dstLoc;
 
     @Column(nullable = false, columnDefinition = "varchar(256) default 'committed'")
     String cabState;
 
-    public ActiveRide(Integer cabId, Integer rideId, Integer srcLoc, Integer dstLoc, String cabState) {
+    public ActiveRide(Long cabId, Long rideId, Long srcLoc, Long dstLoc, String cabState) {
         this.cabId = cabId;
         this.rideId = rideId;
         this.srcLoc = srcLoc;
