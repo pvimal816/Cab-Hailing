@@ -13,11 +13,12 @@ import javax.transaction.Transactional;
 public class SignOutController {
     public final ActiveRideRepository activeRideRepository;
     public final ActiveCabsRepository activeCabsRepository;
-    private static final String RIDE_SERVICE_URL = "http://localhost:8081";
+    private static String RIDE_SERVICE_URL;
     private static final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public SignOutController(ActiveRideRepository activeRideRepository, ActiveCabsRepository activeCabsRepository) {
+        RIDE_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8081";
         this.activeRideRepository = activeRideRepository;
         this.activeCabsRepository = activeCabsRepository;
     }

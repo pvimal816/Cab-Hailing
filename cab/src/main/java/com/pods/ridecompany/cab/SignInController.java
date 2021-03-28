@@ -13,11 +13,12 @@ import java.net.ConnectException;
 public class SignInController {
     public final ActiveCabsRepository activeCabsRepository;
     public final CabCredentialsRepository cabCredentialsRepository;
-    private static final String RIDE_SERVICE_URL = "http://localhost:8081";
+    private static String RIDE_SERVICE_URL;
     private static RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public SignInController(ActiveCabsRepository activeCabsRepository, CabCredentialsRepository cabCredentialsRepository) {
+        RIDE_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8081";
         this.activeCabsRepository = activeCabsRepository;
         this.cabCredentialsRepository = cabCredentialsRepository;
     }

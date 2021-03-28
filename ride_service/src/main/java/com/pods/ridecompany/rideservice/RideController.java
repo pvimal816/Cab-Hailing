@@ -17,13 +17,15 @@ public class RideController {
     private final ActiveRideRepository activeRideRepo;
     private final ActiveCabsRepository activeCabsRepo;
     private final CabRepository cabRepo;
-    private static final String CAB_SERVICE_URL = "http://localhost:8080";
-    private static final String WALLET_SERVICE_URL = "http://localhost:8082";
+    private static String CAB_SERVICE_URL;// = "http://localhost:8080";
+    private static String WALLET_SERVICE_URL;// = "http://localhost:8082";
     private static RestTemplate restTemplate = new RestTemplate();
 
 
     @Autowired
     public RideController(ActiveRideRepository activeRideRepo, ActiveCabsRepository activeCabsRepo, CabRepository cabRepo) {
+        CAB_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8080";
+        WALLET_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8082";
         this.activeRideRepo = activeRideRepo;
         this.activeCabsRepo = activeCabsRepo;
         this.cabRepo = cabRepo;
@@ -36,6 +38,11 @@ public class RideController {
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
             if(!cab.isInterested){
+                cab.isInterested = true;
+                activeCabsRepo.save(cab);
+                // still we need to notify cab service about this request
+                restTemplate.getForObject(CAB_SERVICE_URL+"requestRide?cabId="+cab.cabId
+                                    +"&rideId=0&sourceLoc="+sourceLoc+"&destinationLoc="+destinationLoc, Boolean.class);
                 continue;
             }
             //generate a rideId
@@ -57,7 +64,7 @@ public class RideController {
             }
             
             // cab has accepted a ride request and now it is in committed state
-            Long fare = (Math.abs(cab.lastStableLocation - sourceLoc) + Math.abs(sourceLoc - destinationLoc)) * 2;
+            Long fare = (Math.abs(cab.lastStableLocation - sourceLoc) + Math.abs(sourceLoc - destinationLoc)) * 10;
             boolean paymentSuccess = restTemplate.getForObject( WALLET_SERVICE_URL+"/deductAmount?custId="+custId+"&amount="+fare, Boolean.class);
             if(paymentSuccess){
                 // payment successfull, so inform a cab to start a ride
