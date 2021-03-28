@@ -55,5 +55,3 @@ then
 else
 	echo "${YELLOW}Test Passing Status: ${RED}$testPassed${NC}"
 fi
-
-

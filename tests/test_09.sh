@@ -48,7 +48,18 @@ fi
 balance_new=$(curl -s "http://localhost:8082/getBalance?custId=201")
 echo "The balance after taking the ride:" $balance_new
 
-## Incomplete - have to check old and new balance.
+diff=`expr $balance_old - $balance_new`
+if [ "$diff" != "1000" ];
+then
+    echo "${RED}Incorrect balance${NC}"
+    testPassed="no"
+else
+    echo "Correct balance"
+fi
 
-
-
+if [ "$testPassed" = "yes" ];
+then
+	echo "${YELLOW}Test Passing Status: ${GREEN}$testPassed${NC}"
+else
+	echo "${YELLOW}Test Passing Status: ${RED}$testPassed${NC}"
+fi

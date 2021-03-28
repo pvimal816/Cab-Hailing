@@ -13,7 +13,7 @@ public interface ActiveRideRepository extends Repository<ActiveRide, Long>{
     List<ActiveRide> findActiveRideByCabId(Long cabId);
     List<ActiveRide> findActiveRidesByCabIdAndRideId(Long cabId, Long rideId);
     List<ActiveRide> findRidesByRideId(Long rideId);
-    
+    boolean existsByCustId(Long custId);
     //TODO: Check why following annotation is needed.
     @Transactional
     void removeActiveRideByCabId(Long cabId);

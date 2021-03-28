@@ -35,6 +35,10 @@ public class RideController {
     @ResponseBody
     @Transactional
     public Long requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
+        if(activeRideRepo.existsByCustId(custId)){
+            //customer can not have multiple simultaneous rides
+            return -1L;
+        }
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
             if(!cab.isInterested){
