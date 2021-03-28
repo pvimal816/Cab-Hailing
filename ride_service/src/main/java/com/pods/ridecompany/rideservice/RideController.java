@@ -17,8 +17,8 @@ public class RideController {
     private final ActiveRideRepository activeRideRepo;
     private final ActiveCabsRepository activeCabsRepo;
     private final CabRepository cabRepo;
-    private static final String CAB_SERVICE_URL = "http://host.docker.internal:8080";
-    private static final String WALLET_SERVICE_URL = "http://host.docker.internal:8082";
+    private static final String CAB_SERVICE_URL = "http://localhost:8080";
+    private static final String WALLET_SERVICE_URL = "http://localhost:8082";
     private static RestTemplate restTemplate = new RestTemplate();
 
 

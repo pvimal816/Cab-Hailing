@@ -14,7 +14,7 @@ public class ConsumeRestAPI {
     RestTemplate restTemplate = new RestTemplate();
 
     public boolean consumeRideEnded(Long cabId, Long rideId){
-        final String URL = "http://host.docker.internal:8082/rideEnded?cabId={cabId}&rideId={rideId}";
+        final String URL = "http://localhost:8082/rideEnded?cabId={cabId}&rideId={rideId}";
 
         Map<String,Long> param = new HashMap<>();
         param.put("cabId",cabId);

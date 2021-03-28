@@ -13,7 +13,7 @@ import java.net.ConnectException;
 public class SignInController {
     public final ActiveCabsRepository activeCabsRepository;
     public final CabCredentialsRepository cabCredentialsRepository;
-    private static final String RIDE_SERVICE_URL = "http://host.docker.internal:8081";
+    private static final String RIDE_SERVICE_URL = "http://localhost:8081";
     private static RestTemplate restTemplate = new RestTemplate();
 
     @Autowired

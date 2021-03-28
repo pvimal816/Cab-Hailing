@@ -2,27 +2,28 @@
 
 cd cab
 chmod +x mvnw
-./mvnw -DskipTests clean package
+./mvnw -DskipTests package
 docker build -t cab_service .
-docker run -d -p 127.0.0.1:8080:8080 cab_service
+docker run --network=host -d cab_service
 
 cd ../ride_service
 chmod +x mvnw
-./mvnw -DskipTests clean package
+./mvnw -DskipTests package
 docker build -t ride_service .
-docker run -d -p 127.0.0.1:8081:8081 ride_service
+docker run --network=host -d ride_service
 
 cd ../wallet
 chmod +x mvnw
-./mvnw -DskipTests clean package
+./mvnw -DskipTests package
 docker build -t wallet_service .
-docker run -d -p 127.0.0.1:8082:8082 wallet_service
+docker run --network=host -d wallet_service
 
 # sleep 100 second before running tests
-sleep 100
+sleep 50
 
 # Run tests
 cd ../tests
 for f in *.sh; do
   sh "$f" || break
+  echo ""
 done
