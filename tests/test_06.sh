@@ -1,7 +1,8 @@
 #! /bin/sh
-# This test case checks the functionality of requestRide
+# This test case checks the functionality of numRides.
 
-# This test checks whether an invalid customerId can book a cab or not.
+# We call numRides to a signed-out cab. It should return 0, as per the requirements mentioned. 
+# Inadvertently, also checks if sign-in and sign-out work properly.
 
 # Color
 RED='\033[0;31m'
@@ -9,7 +10,7 @@ GREEN='\033[0;32m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
-echo "${GREEN}==== Test test_04 ====${NC}"
+echo "${GREEN}==== Test test_06 ====${NC}"
 
 testPassed="yes"
 
@@ -28,15 +29,25 @@ else
 	testPassed="no"
 fi
 
-# customer -1000 sends a request. Since this is non-negative and will not be present, it should fail.
-resp=$(curl -s "http://localhost:8081/requestRide?custId=-1000&sourceLoc=10&destinationLoc=14")
-if [ "$resp" = "-1" ];
+
+# cab 101 signs out
+resp=$(curl -s "http://localhost:8080/signOut?cabId=101")
+if [ "$resp" = "true" ];
 then
-	echo "Customer -1000 is not alloted a ride"
+	echo "Cab 101 signed out"
 else
-	echo "Customer -1000 alloted a ride number " $resp
+	echo "Cab 101 could not sign out"
 	testPassed="no"
 fi
+
+resp=$(curl -s "http://localhost:8080/numRides?cabId=101")
+if [ "$resp" = "0" ];
+then
+	testPassed="yes"
+else
+	testPassed="no"
+fi
+
 
 if [ "$testPassed" = "yes" ];
 then
@@ -44,3 +55,5 @@ then
 else
 	echo "${YELLOW}Test Passing Status: ${RED}$testPassed${NC}"
 fi
+
+
