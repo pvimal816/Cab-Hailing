@@ -51,11 +51,11 @@ fi
 # customer 201 again sends a request for ride. 
 # This request must be denied.
 rideId=$(curl -s "http://localhost:8081/requestRide?custId=201&sourceLoc=10&destinationLoc=14")
-if [ "$rideId" = "-1" ];
+if [ ! "$rideId" = "-1" ];
 then
-	echo "Customer 201 is not alloted a ride" 
+	echo "Customer 201 alloted a ride"
 else
-	echo "${RED}Customer 201 alloted a ride${NC}"
+	echo "${RED}Customer 201 is not alloted a ride${NC}" 
 	testPassed="no"
 fi
 

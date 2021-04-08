@@ -17,8 +17,8 @@ public class RideController {
     private final ActiveRideRepository activeRideRepo;
     private final ActiveCabsRepository activeCabsRepo;
     private final CabRepository cabRepo;
-    private static String CAB_SERVICE_URL;// = "http://localhost:8080";
-    private static String WALLET_SERVICE_URL;// = "http://localhost:8082";
+    private static String CAB_SERVICE_URL;
+    private static String WALLET_SERVICE_URL;
     private static RestTemplate restTemplate = new RestTemplate();
 
 
@@ -35,16 +35,13 @@ public class RideController {
     @ResponseBody
     @Transactional
     public Long requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
-        if(activeRideRepo.existsByCustId(custId)){
-            //customer can not have multiple simultaneous rides
-            return -1L;
-        }
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
             if(!cab.isInterested){
+                // cab will be interested in next request
                 cab.isInterested = true;
                 activeCabsRepo.save(cab);
-                // still we need to notify cab service about this request
+                // notify cab service about this request
                 restTemplate.getForObject(CAB_SERVICE_URL+"requestRide?cabId="+cab.cabId
                                     +"&rideId=0&sourceLoc="+sourceLoc+"&destinationLoc="+destinationLoc, Boolean.class);
                 continue;
@@ -64,6 +61,9 @@ public class RideController {
                 // cab has denied a ride request
                 // so delete this entry from rideService database also
                 activeRideRepo.removeActiveRidesByRideId(ride.rideId);
+                cab.isAvailable = true;
+                cab.isInterested = true;
+                activeCabsRepo.save(cab);
                 continue;
             }
             
@@ -77,7 +77,13 @@ public class RideController {
                 activeRideRepo.save(ride);
                 return ride.rideId;
             }else{
+                //insufficient balance so cancel this ride
+                //Now, cab is available so reflect it into db
+                cab.isAvailable = true;
+                activeCabsRepo.save(cab);
+                //Notify cab service for cancelation
                 restTemplate.getForObject(CAB_SERVICE_URL+"/rideCanceled?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
+                //remove this ride entry from db
                 activeRideRepo.removeActiveRidesByRideId(ride.rideId);
                 return -1L;
             }
