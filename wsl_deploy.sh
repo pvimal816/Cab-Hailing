@@ -16,7 +16,7 @@ chmod +x mvnw
 docker build -t wallet_service .
 docker run --rm=true -d -p 127.0.0.1:8082:8082 --env HOST_URL=host.docker.internal wallet_service
 
-# sleep 100 second before running tests
+# sleep before running tests
 sleep 50
 
 # Run tests
