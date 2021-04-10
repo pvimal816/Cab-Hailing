@@ -24,8 +24,9 @@ public class RideController {
 
     @Autowired
     public RideController(ActiveRideRepository activeRideRepo, ActiveCabsRepository activeCabsRepo, CabRepository cabRepo) {
-        CAB_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8080";
-        WALLET_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8082";
+        CAB_SERVICE_URL = "http://cab-service-cluster:8080";
+        WALLET_SERVICE_URL = "http://wallet-service-cluster:8082";
+
         this.activeRideRepo = activeRideRepo;
         this.activeCabsRepo = activeCabsRepo;
         this.cabRepo = cabRepo;

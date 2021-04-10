@@ -28,7 +28,7 @@ public class RideController {
 
     @Autowired
     public RideController(ActiveRideRepository activeRideRepository, ActiveCabsRepository activeCabsRepository, CabCredentialsRepository cabRepo){
-        RIDE_SERVICE_URL = "http://" + System.getenv("HOST_URL") + ":8081";
+        RIDE_SERVICE_URL = "http://ride-service-cluster:8081";
         this.activeRideRepository = activeRideRepository;
         this.activeCabsRepository = activeCabsRepository;
         this.cabRepo = cabRepo;
