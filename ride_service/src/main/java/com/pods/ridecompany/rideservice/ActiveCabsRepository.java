@@ -2,9 +2,11 @@ package com.pods.ridecompany.rideservice;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+@Transactional
 public interface ActiveCabsRepository extends Repository<ActiveCab, Long> {
     void save(ActiveCab activeCabs);
     List<ActiveCab> findActiveCabsByCabId(Long cabId);
