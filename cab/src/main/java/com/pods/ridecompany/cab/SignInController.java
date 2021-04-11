@@ -2,6 +2,7 @@ package com.pods.ridecompany.cab;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -25,6 +26,7 @@ public class SignInController {
 
     @RequestMapping("/signIn")
     @ResponseBody
+    @Transactional
     public boolean signIn(@RequestParam Long cabId, @RequestParam Long initialPos){
         if(!cabCredentialsRepository.existsByCabId(cabId)){
             return false;

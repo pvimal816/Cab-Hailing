@@ -14,12 +14,12 @@ echo "${GREEN}==== Test test_04 ====${NC}"
 testPassed="yes"
 
 # reset RideService and Wallet.
-curl -s http://localhost:8081/reset
-curl -s http://localhost:8082/reset
+curl -s http://10.109.206.190:8081/reset
+curl -s http://10.99.78.76:8082/reset
 
 
 # cab 101 signs in at location 10.
-resp=$(curl -s "http://localhost:8080/signIn?cabId=101&initialPos=10")
+resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=10")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"
@@ -29,7 +29,7 @@ else
 fi
 
 # customer -1000 sends a request. Since this is non-negative and will not be present, it should fail.
-resp=$(curl -s "http://localhost:8081/requestRide?custId=-1000&sourceLoc=10&destinationLoc=14")
+resp=$(curl -s "http://10.109.206.190:8081/requestRide?custId=-1000&sourceLoc=10&destinationLoc=14")
 if [ "$resp" = "-1" ];
 then
 	echo "Customer -1000 is not alloted a ride"

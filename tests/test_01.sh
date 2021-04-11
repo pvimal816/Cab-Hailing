@@ -12,13 +12,13 @@ echo "${GREEN}==== Test test_01 ====${NC}"
 
 # reset RideService and Wallet.
 # every test case should begin with these two steps
-curl -s http://localhost:8081/reset
-curl -s http://localhost:8082/reset
+curl -s http://10.109.206.190:8081/reset
+curl -s http://10.99.78.76:8082/reset
 
 testPassed="yes"
 
 # cab 101 signs in
-resp=$(curl -s "http://localhost:8080/signIn?cabId=101&initialPos=0")
+resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=0")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"
@@ -28,7 +28,7 @@ else
 fi
 
 # cab 101 signs out
-resp=$(curl -s "http://localhost:8080/signOut?cabId=101")
+resp=$(curl -s "http://10.97.17.224:8080/signOut?cabId=101")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed out"

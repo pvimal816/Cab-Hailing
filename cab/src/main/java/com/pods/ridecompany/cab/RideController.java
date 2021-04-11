@@ -8,10 +8,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-import javax.transaction.Transactional;
+import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.PersistenceContext;
+
 
 @Controller
 public class RideController {
@@ -22,6 +26,8 @@ public class RideController {
     private static String RIDE_SERVICE_URL;
     private static RestTemplate restTemplate = new RestTemplate();
     
+    @PersistenceContext
+    private EntityManager em;
 
     @Autowired
     ConsumeRestAPI consumeRestAPI;
@@ -36,21 +42,28 @@ public class RideController {
 
     @RequestMapping(value = "/requestRide", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional
     public boolean requestRide(@RequestParam Long cabId, @RequestParam Long rideId,
                                @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
         ActiveCab cab;
+
+        if (activeRideRepository.existsActiveRideByCabId(cabId)) {
+            // the cab is busy
+            return false;
+        }
+
         try {
-            cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
-        }catch (IndexOutOfBoundsException e){
+            // cab = activeCabsRepository.findActiveCabsByCabId(cabId).get(0);
+            cab = em.find(ActiveCab.class, cabId, LockModeType.PESSIMISTIC_WRITE);
+            if(cab==null)
+                return false;
+        }catch (Throwable e){
             //No cab present with this cabId
+            System.err.println("Potential error in /requestRide.");
+            e.printStackTrace();
             return false;
         }
-
-        if(activeRideRepository.existsActiveRideByCabId(cabId)){
-            //the cab is busy
-            return false;
-        }
-
+    
         if(cab.isInterested==0){
             //cab is not interested in taking this ride.
             cab.isInterested = 1;
@@ -67,6 +80,7 @@ public class RideController {
 
     @RequestMapping(value="/rideStarted", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional
     public boolean rideStarted(@RequestParam Long cabId, @RequestParam Long rideId){
         try {
             ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
@@ -108,7 +122,10 @@ public class RideController {
     @Transactional
     public boolean rideEnded(@RequestParam Long cabId, @RequestParam Long rideId){
         try {
-            ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
+            // ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
+            ActiveRide ride = em.find(ActiveRide.class, cabId, LockModeType.PESSIMISTIC_WRITE);
+            if(ride == null)
+                return false;
             if(!ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
                 //ride not yet started.
                 return false;
@@ -121,20 +138,21 @@ public class RideController {
 
             //update the location in active_cab table
             try {
-                ActiveCab cab = activeCabsRepository.findActiveCabsByCabId(ride.cabId).get(0);
+                ActiveCab cab = em.find(ActiveCab.class, ride.cabId, LockModeType.PESSIMISTIC_WRITE);
+                // ActiveCab cab = activeCabsRepository.findActiveCabsByCabId(ride.cabId).get(0);
                 cab.lastStableLocation = ride.dstLoc;
                 cab.rideCnt += 1;
                 activeCabsRepository.save(cab);
-            }catch (IndexOutOfBoundsException e) {
-                System.err.println("Found a record in active_ride table with no " +
-                        "corresponding cabId in active_cab table. CabId: " + ride.cabId);
+            }catch (Throwable e) {
+                // System.err.println("Found a record in active_ride table with no " +
+                //         "corresponding cabId in active_cab table. CabId: " + ride.cabId);
+                System.err.println("Potential error in rideEnded: " + e.getMessage());
                 return false;
             }
             //now remove this ride entry from active_ride table
             activeRideRepository.removeActiveRidesByCabIdAndRideId(cabId, rideId);
-        }catch (IndexOutOfBoundsException e){
-            //no request received for this (cabId, rideId) pair.
-            //probably /requestRide is bypassed
+        } catch (Throwable e) {
+            System.err.println("Potential error in rideEnded: " + e.getMessage());
             return false;
         }
         return true;
@@ -142,6 +160,7 @@ public class RideController {
 
     @RequestMapping(value = "/numRides", method = RequestMethod.GET)
     @ResponseBody
+    @Transactional
     public Long numRides(@RequestParam Long cabId){
         if(!cabRepo.existsByCabId(cabId)){
             // Invalid cabId

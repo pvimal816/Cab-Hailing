@@ -6,9 +6,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.EntityManager;
+
 import java.lang.Math;
 
 @Controller
@@ -21,6 +26,8 @@ public class RideController {
     private static String WALLET_SERVICE_URL;
     private static RestTemplate restTemplate = new RestTemplate();
 
+    @Autowired
+    private EntityManager em;
 
     @Autowired
     public RideController(ActiveRideRepository activeRideRepo, ActiveCabsRepository activeCabsRepo, CabRepository cabRepo) {
@@ -34,7 +41,7 @@ public class RideController {
 
     @GetMapping(value = "requestRide")
     @ResponseBody
-    @Transactional
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public Long requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
@@ -134,8 +141,8 @@ public class RideController {
     @ResponseBody
     @Transactional
     public boolean cabSignsOut(@RequestParam Long cabId){
-        boolean inSignedIn = activeCabsRepo.existsByCabId(cabId);
         boolean isAvailable = !activeRideRepo.existsByCabId(cabId);
+        boolean inSignedIn = activeCabsRepo.existsByCabId(cabId);
 
         if(inSignedIn && isAvailable){
             activeCabsRepo.removeActiveCabByCabId(cabId);
@@ -155,7 +162,10 @@ public class RideController {
             return "InvalidCabId";
         }
 
+        List<ActiveRide> rides = activeRideRepo.findActiveRideByCabId(cabId);
         List<ActiveCab> cabs = activeCabsRepo.findActiveCabsByCabId(cabId);
+        
+
         boolean isSignedOut = cabs.isEmpty();
         if(isSignedOut){
             return "signed-out " + "-1";
@@ -164,8 +174,15 @@ public class RideController {
         if(cabs.get(0).isAvailable){
             return "available " + cabs.get(0).lastStableLocation;
         }
+        
+        ActiveRide ride;
+        try{
+            ride = rides.get(0);
+        }catch(IndexOutOfBoundsException e){
+            System.err.println("This is an error: " + e.getMessage());
+            return "available " + cabs.get(0).lastStableLocation;
+        }
 
-        ActiveRide ride = activeRideRepo.findActiveRideByCabId(cabId).get(0);
         if(ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
             return "giving-ride " + ride.getSrcLoc() + " " + ride.getCustId() + " " + ride.getDstLoc();
         }

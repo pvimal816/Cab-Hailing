@@ -15,7 +15,7 @@ public class ConsumeRestAPI {
 
     public boolean consumeRideEnded(Long cabId, Long rideId){
         
-        final String URL = "http://wallet-service-cluster:8081/rideEnded?cabId={cabId}&rideId={rideId}";
+        final String URL = "http://ride-service-cluster:8081/rideEnded?cabId={cabId}&rideId={rideId}";
 
         Map<String,Long> param = new HashMap<>();
         param.put("cabId",cabId);
