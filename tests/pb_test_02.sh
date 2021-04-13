@@ -10,13 +10,13 @@ NC='\033[0m' # No Color
 echo "${GREEN}==== Test pb_test_02 ====${NC}"
 
 # every test case should begin with these two steps
-curl -s http://10.109.206.190:8081/reset
-curl -s http://10.99.78.76:8082/reset
+curl -s http://10.108.209.222:8081/reset
+curl -s http://10.106.181.133:8082/reset
 
 testPassed="yes"
 
 #Step 1 : Status of a signed-out cab
-resp=$(curl -s "http://10.109.206.190:8081/getCabStatus?cabId=101")
+resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
 if [ "$resp" != "signed-out -1" ];
 then
     echo "Invalid Status for the cab 101"
@@ -26,7 +26,7 @@ else
 fi
 
 #Step 2 : cab 101 signs in
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=100")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=100")
 if [ "$resp" = "true" ];
 then
     echo "Cab 101 signed in"
@@ -36,7 +36,7 @@ else
 fi
 
 #Step 3 : Status of a signed-in cab
-resp=$(curl -s "http://10.109.206.190:8081/getCabStatus?cabId=101")
+resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
 if [ "$resp" != "available 100" ];
 then
     echo "Invalid Status for the cab 101"
@@ -47,7 +47,8 @@ fi
 
 
 #Step 4 : customer 201 requests a ride
-rideId=$(curl -s "http://10.109.206.190:8081/requestRide?custId=201&sourceLoc=110&destinationLoc=200")
+rideDetails=$(curl -s "http://10.108.209.222:8081/requestRide?custId=201&sourceLoc=110&destinationLoc=200")
+rideId=$(echo $rideDetails | cut -d' ' -f 1)
 if [ "$rideId" != "-1" ];
 then
     echo "Ride by customer 201 started"
@@ -57,7 +58,7 @@ else
 fi
 
 #Step 5 : Status of a cab on ride
-resp=$(curl -s "http://10.109.206.190:8081/getCabStatus?cabId=101")
+resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
 if [ "$resp" != "giving-ride 110 201 200" ];
 then
     echo "Invalid Status for the cab 101"
@@ -67,7 +68,7 @@ else
 fi
 
 #Step 6 : End ride1
-resp=$(curl -s "http://10.97.17.224:8080/rideEnded?cabId=101&rideId=$rideId")
+resp=$(curl -s "http://10.97.69.1:8080/rideEnded?cabId=101&rideId=$rideId")
 if [ "$resp" = "true" ];
 then
     echo "$rideId has ended"
@@ -78,7 +79,7 @@ fi
 
 
 #Step 7 : #Status of a cab after a ride
-resp=$(curl -s "http://10.109.206.190:8081/getCabStatus?cabId=101")
+resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
 if [ "$resp" != "available 200" ];
 then
     echo "Invalid Status for the cab 101"

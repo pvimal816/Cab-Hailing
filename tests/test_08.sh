@@ -13,12 +13,12 @@ echo "${GREEN}==== Test test_08 ====${NC}"
 testPassed="yes"
 
 # reset RideService and Wallet.
-curl -s http://10.109.206.190:8081/reset
-curl -s http://10.99.78.76:8082/reset
+curl -s http://10.108.209.222:8081/reset
+curl -s http://10.106.181.133:8082/reset
 
 
 # cab 101 signs in at location 10.
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=10")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=10")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"
@@ -28,7 +28,7 @@ else
 fi
 
 # cab 101 tries to sign in again.
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=10")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=10")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"

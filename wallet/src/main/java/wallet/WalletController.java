@@ -68,6 +68,8 @@ public class WalletController {
         try{
             // Wallet wallet = repository.findWalletsByCustId(custId).get(0);
             Wallet wallet = em.find(Wallet.class, custId, LockModeType.PESSIMISTIC_WRITE);
+            if(wallet==null)
+                return false;
             if(wallet.balance < amount)
                 return false;
             wallet.balance = wallet.balance-amount;

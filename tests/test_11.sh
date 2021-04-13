@@ -15,11 +15,11 @@ echo "${GREEN}==== Test test_11 ====${NC}"
 testPassed="yes"
 
 # reset RideService and Wallet.
-curl -s http://10.109.206.190:8081/reset
-curl -s http://10.99.78.76:8082/reset
+curl -s http://10.108.209.222:8081/reset
+curl -s http://10.106.181.133:8082/reset
 
 # cab 101 signs in
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=0")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=0")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"
@@ -29,7 +29,7 @@ else
 fi
 
 # cab 101 signs in
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=102&initialPos=0")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=102&initialPos=0")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 102 signed in"
@@ -39,7 +39,8 @@ else
 fi
 
 # customer 201 sends a request for ride
-rideId=$(curl -s "http://10.109.206.190:8081/requestRide?custId=201&sourceLoc=14&destinationLoc=10")
+rideDetails=$(curl -s "http://10.108.209.222:8081/requestRide?custId=201&sourceLoc=14&destinationLoc=10")
+rideId=$(echo $rideDetails | cut -d' ' -f 1)
 if [ ! "$rideId" = "-1" ];
 then
 	echo "Customer 201 alloted a ride number " $rideId
@@ -50,7 +51,8 @@ fi
 
 # customer 201 again sends a request for ride. 
 # This request must be denied.
-rideId=$(curl -s "http://10.109.206.190:8081/requestRide?custId=201&sourceLoc=10&destinationLoc=14")
+rideDetails=$(curl -s "http://10.108.209.222:8081/requestRide?custId=201&sourceLoc=10&destinationLoc=14")
+rideId=$(echo $rideDetails | cut -d' ' -f 1)
 if [ ! "$rideId" = "-1" ];
 then
 	echo "Customer 201 alloted a ride"

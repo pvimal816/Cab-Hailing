@@ -1,6 +1,5 @@
 #! /bin/sh
-# cab 101 signs in. Then 3 customers 
-# concurrently request a ride.
+# Four customers, two rides. Two of them should get a ride, two of them should not get a ride.
 
 # Color
 RED='\033[0;31m';
@@ -28,11 +27,22 @@ else
     exit 0;
 fi
 
-# Now, 3 customer concurrently requests a ride
-sh cust_201.sh & sh cust_202.sh & sh cust_203.sh;
+#cab 102 signs in
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=102&initialPos=0")
+if [ "$resp" = "true" ];
+then
+	echo "Cab 102 signed in"
+else
+	echo "${RED}Cab 102 could not sign in${NC}"
+	testPassed="no"
+    exit 0;
+fi
 
-wait;
 
-#Status of a cab after a ride
-resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
-echo "Status for the cab 101: $resp"
+sh cust_201.sh & sh cust_202.sh & sh cust_203.sh & sh cust_204.sh
+
+wait
+
+
+
+

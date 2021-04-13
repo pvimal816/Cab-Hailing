@@ -1,6 +1,5 @@
 #! /bin/sh
-# cab 101 signs in. Then 3 customers 
-# concurrently request a ride.
+# One cab, 3 customers. All the rides should be finished by this cab and the number of rides should reflect this.
 
 # Color
 RED='\033[0;31m';
@@ -15,8 +14,6 @@ echo "${GREEN}==== Test pb_test_01 ====${NC}";
 curl -s http://10.108.209.222:8081/reset;
 curl -s http://10.106.181.133:8082/reset;
 
-testPassed="yes";
-
 #cab 101 signs in
 resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=0")
 if [ "$resp" = "true" ];
@@ -28,11 +25,19 @@ else
     exit 0;
 fi
 
-# Now, 3 customer concurrently requests a ride
-sh cust_201.sh & sh cust_202.sh & sh cust_203.sh;
+sh cust_201.sh & sh cust_202.sh & sh cust_203.sh & sh cust_201.sh & sh cust_202.sh
 
-wait;
+wait
 
-#Status of a cab after a ride
-resp=$(curl -s "http://10.108.209.222:8081/getCabStatus?cabId=101")
-echo "Status for the cab 101: $resp"
+numRides=$(curl -s "http://10.97.69.1:8080/numRides?cabId=101")
+
+echo "Number of rides:" $numRides
+
+if [ "$numRides" = "5" ];
+then
+    echo "Correct number of rides"
+else
+    echo "Wrong number of rides"
+fi
+
+

@@ -121,6 +121,7 @@ public class RideController {
     @ResponseBody
     @Transactional
     public boolean rideEnded(@RequestParam Long cabId, @RequestParam Long rideId){
+        
         try {
             // ActiveRide ride = activeRideRepository.findActiveRidesByCabIdAndRideId(cabId, rideId).get(0);
             ActiveRide ride = em.find(ActiveRide.class, cabId, LockModeType.PESSIMISTIC_WRITE);

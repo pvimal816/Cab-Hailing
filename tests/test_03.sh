@@ -15,12 +15,12 @@ echo "${GREEN}==== Test test_03 ====${NC}"
 testPassed="yes"
 
 # reset RideService and Wallet.
-curl -s http://10.109.206.190:8081/reset
-curl -s http://10.99.78.76:8082/reset
+curl -s http://10.108.209.222:8081/reset
+curl -s http://10.106.181.133:8082/reset
 
 
 # cab 101 signs in
-resp=$(curl -s "http://10.97.17.224:8080/signIn?cabId=101&initialPos=0")
+resp=$(curl -s "http://10.97.69.1:8080/signIn?cabId=101&initialPos=0")
 if [ "$resp" = "true" ];
 then
 	echo "Cab 101 signed in"
@@ -31,7 +31,8 @@ fi
 
 # customer 201 sends a request with source location 14 and destination 
 # location which is very far away
-resp=$(curl -s "http://10.109.206.190:8081/requestRide?custId=201&sourceLoc=14&destinationLoc=10000000000")
+rideDetails=$(curl -s "http://10.108.209.222:8081/requestRide?custId=201&sourceLoc=14&destinationLoc=10000000000")
+resp=$(echo $rideDetails | cut -d' ' -f 1)
 if [ "$resp" = "-1" ];
 then
 	echo "Customer 201 is not alloted a ride"

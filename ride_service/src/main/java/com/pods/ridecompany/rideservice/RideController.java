@@ -13,6 +13,9 @@ import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+
+import javax.persistence.PersistenceContext;
 
 import java.lang.Math;
 
@@ -26,7 +29,7 @@ public class RideController {
     private static String WALLET_SERVICE_URL;
     private static RestTemplate restTemplate = new RestTemplate();
 
-    @Autowired
+    @PersistenceContext
     private EntityManager em;
 
     @Autowired
@@ -42,7 +45,7 @@ public class RideController {
     @GetMapping(value = "requestRide")
     @ResponseBody
     @Transactional(isolation = Isolation.SERIALIZABLE)
-    public Long requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
+    public String requestRide(@RequestParam Long custId, @RequestParam Long sourceLoc, @RequestParam Long destinationLoc){
         List<ActiveCab> nearestCabs = activeCabsRepo.findNearestThreeCabs(sourceLoc);
         for(ActiveCab cab: nearestCabs){
             if(!cab.isInterested){
@@ -83,7 +86,7 @@ public class RideController {
                 restTemplate.getForObject(CAB_SERVICE_URL+"/rideStarted?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
                 ride.cabState = ActiveRide.CAB_STATE_GIVING_RIDE;
                 activeRideRepo.save(ride);
-                return ride.rideId;
+                return ride.rideId + " " + ride.cabId + " " + fare;
             }else{
                 //insufficient balance so cancel this ride
                 //Now, cab is available so reflect it into db
@@ -93,11 +96,11 @@ public class RideController {
                 restTemplate.getForObject(CAB_SERVICE_URL+"/rideCanceled?cabId="+cab.cabId+"&rideId="+ride.rideId, Boolean.class);
                 //remove this ride entry from db
                 activeRideRepo.removeActiveRidesByRideId(ride.rideId);
-                return -1L;
+                return "-1";
             }
         }
         // No cab found to satisfy request
-        return -1L;
+        return "-1";
     }
 
     @GetMapping(value="/rideEnded")
@@ -110,7 +113,10 @@ public class RideController {
                 //ride is still in COMMITTED state
                 return false;
             }
-            ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
+            // ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
+            ActiveCab cab = em.find(ActiveCab.class, ride.cabId, LockModeType.PESSIMISTIC_WRITE);
+            if(cab==null)
+                return false;
             cab.lastStableLocation = ride.dstLoc;
             cab.rideCnt += 1;
             cab.isAvailable = true;
@@ -193,23 +199,22 @@ public class RideController {
     @GetMapping(value="/reset")
     @ResponseBody
     @Transactional
-    void reset(){
+    public void reset(){
         List<ActiveRide> rides = activeRideRepo.findAll();
         for(ActiveRide ride : rides){
             if(ride.cabState.equals(ActiveRide.CAB_STATE_GIVING_RIDE)){
                 restTemplate.getForObject(
                         CAB_SERVICE_URL+ "/rideEnded?cabId=" + ride.cabId + "&rideId=" + ride.rideId,
                         Boolean.class);
-                ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
-                cab.isAvailable = true;
-                cab.lastStableLocation = ride.dstLoc;
-                activeCabsRepo.save(cab);
                 activeRideRepo.removeActiveRidesByCabIdAndRideId(ride.cabId, ride.rideId);
             }else if(ride.cabState.equals(ActiveRide.CAB_STATE_COMMITTED)){
+                ActiveCab cab = em.find(ActiveCab.class, ride.cabId, LockModeType.PESSIMISTIC_WRITE);
+                if (cab == null)
+                    continue;
                 restTemplate.getForObject(
                         CAB_SERVICE_URL+ "/rideCanceled?cabId=" + ride.cabId + "&rideId=" + ride.rideId,
                         Boolean.class);
-                ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
+                // ActiveCab cab = activeCabsRepo.findActiveCabsByCabId(ride.cabId).get(0);
                 cab.isAvailable = true;
                 activeCabsRepo.save(cab);
                 activeRideRepo.removeActiveRidesByCabIdAndRideId(ride.cabId, ride.rideId);
