@@ -1,6 +1,4 @@
-# pods project 01
-
-A web app for cab hailing company.
+Implementation of a web app for a cab hailing company.
 
 ## How to deploy in Ubuntu
 
